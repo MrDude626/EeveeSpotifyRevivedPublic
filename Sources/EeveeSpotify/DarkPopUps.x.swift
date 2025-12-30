@@ -7,7 +7,7 @@ struct DarkPopUps: HookGroup { }
 private var popUpContainerViewController: String {
     switch EeveeSpotify.hookTarget {
     case .lastAvailableiOS14: return "SPTEncorePopUpContainer"
-    default: return "EncoreConsumerMobile_Wrappers.PopUpPresentableContainer"
+    default: return "SPTEncorePopUpContainer" // Use older class for compatibility with 9.1.6
     }
 }
 
