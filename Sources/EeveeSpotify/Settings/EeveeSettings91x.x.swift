@@ -7,8 +7,8 @@ struct V91SettingsIntegrationGroup: HookGroup { }
 
 // Helper to show banner (not a hook method)
 func showVersionBannerOnWindow(_ window: UIWindow) {
-    // Create a banner view
-    let banner = UIView(frame: CGRect(x: 20, y: -100, width: window.bounds.width - 40, height: 80))
+    // Create a banner view - increased height for 3 lines
+    let banner = UIView(frame: CGRect(x: 20, y: -120, width: window.bounds.width - 40, height: 100))
     banner.backgroundColor = .systemGreen
     banner.layer.cornerRadius = 12
     banner.layer.shadowColor = UIColor.black.cgColor
@@ -16,11 +16,11 @@ func showVersionBannerOnWindow(_ window: UIWindow) {
     banner.layer.shadowOffset = CGSize(width: 0, height: 4)
     banner.layer.shadowRadius = 8
     
-    let label = UILabel(frame: banner.bounds.insetBy(dx: 16, dy: 16))
+    let label = UILabel(frame: banner.bounds.insetBy(dx: 16, dy: 12))
     label.numberOfLines = 0
     label.textAlignment = .center
     label.textColor = .white
-    label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+    label.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
     label.text = """
     🎵 EeveeSpotify v\(EeveeSpotify.version)
     Spotify \(Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String)
@@ -36,7 +36,7 @@ func showVersionBannerOnWindow(_ window: UIWindow) {
     } completion: { _ in
         // Animate out after 4 seconds
         UIView.animate(withDuration: 0.3, delay: 4.0, options: []) {
-            banner.frame.origin.y = -100
+            banner.frame.origin.y = -120
         } completion: { _ in
             banner.removeFromSuperview()
         }
