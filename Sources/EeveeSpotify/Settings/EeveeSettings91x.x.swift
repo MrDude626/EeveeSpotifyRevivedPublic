@@ -49,14 +49,20 @@ func showVersionBannerOnWindow(_ window: UIWindow) {
 class UIWindowKeyHook: ClassHook<UIWindow> {
     typealias Group = V91SettingsIntegrationGroup
     
-    static var hasShownBanner = false
-    
     func becomeKeyWindow() {
         orig.becomeKeyWindow()
         
-        // Only show banner once
-        guard !Self.hasShownBanner else { return }
-        Self.hasShownBanner = true
+        // Check if we've already shown banner for this version
+        let lastShownVersion = UserDefaults.standard.string(forKey: "EeveeSpotify_LastBannerVersion")
+        let currentVersion = EeveeSpotify.version
+        
+        guard lastShownVersion != currentVersion else {
+            NSLog("[EeveeSpotify] Banner already shown for version \(currentVersion)")
+            return
+        }
+        
+        // Mark this version as shown
+        UserDefaults.standard.set(currentVersion, forKey: "EeveeSpotify_LastBannerVersion")
         
         // Show banner after a short delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
