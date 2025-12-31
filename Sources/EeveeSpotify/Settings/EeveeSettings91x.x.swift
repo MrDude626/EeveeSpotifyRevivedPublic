@@ -2,49 +2,39 @@ import Orion
 import SwiftUI
 import UIKit
 
-// Settings integration for 9.1.x - adds a button to SPTRootSettingsView
+// Settings integration for 9.1.x - uses triple-tap on status bar area to show version info
 struct V91SettingsIntegrationGroup: HookGroup { }
 
-class SPTRootSettingsViewHook: ClassHook<UIView> {
+// Hook UIWindow to detect triple-tap on status bar area
+class UIWindowTripleTapHook: ClassHook<UIWindow> {
     typealias Group = V91SettingsIntegrationGroup
-    static let targetName = "SPTRootSettingsView"
     
-    // Track if we've already added our button to avoid duplicates
-    static var hasAddedButton = false
+    static var hasSetupGesture = false
     
-    func didMoveToWindow() {
-        orig.didMoveToWindow()
+    func didMoveToSuperview() {
+        orig.didMoveToSuperview()
         
-        // Only add button once
-        guard !Self.hasAddedButton, target.window != nil else { return }
-        Self.hasAddedButton = true
+        // Only setup once
+        guard !Self.hasSetupGesture, target.superview != nil else { return }
+        Self.hasSetupGesture = true
         
-        // Create a button in the top-right corner
-        let button = UIButton(type: .system)
-        button.setTitle("ℹ️", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 24)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(showVersionInfo), for: .touchUpInside)
+        // Add a triple-tap gesture recognizer to the window
+        let tripleTap = UITapGestureRecognizer(target: self, action: #selector(handleTripleTap(_:)))
+        tripleTap.numberOfTapsRequired = 3
+        target.addGestureRecognizer(tripleTap)
         
-        target.addSubview(button)
-        
-        NSLayoutConstraint.activate([
-            button.topAnchor.constraint(equalTo: target.safeAreaLayoutGuide.topAnchor, constant: 8),
-            button.trailingAnchor.constraint(equalTo: target.trailingAnchor, constant: -16),
-            button.widthAnchor.constraint(equalToConstant: 44),
-            button.heightAnchor.constraint(equalToConstant: 44)
-        ])
+        NSLog("[EeveeSpotify] Triple-tap gesture added to UIWindow for version info")
     }
     
-    @objc func showVersionInfo() {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootViewController = window.rootViewController else {
-            return
-        }
+    @objc func handleTripleTap(_ gesture: UITapGestureRecognizer) {
+        let tapLocation = gesture.location(in: target)
+        
+        // Only trigger if tapped in the top 60 points (status bar area)
+        guard tapLocation.y < 60 else { return }
         
         // Find the top-most view controller
-        var topController = rootViewController
+        guard var topController = target.rootViewController else { return }
+        
         while let presentedViewController = topController.presentedViewController {
             topController = presentedViewController
         }
@@ -59,6 +49,8 @@ class SPTRootSettingsViewHook: ClassHook<UIView> {
             • Premium patching: ✓ Active
             • Lyrics: ✗ Not available
             • Full settings: ✗ Not available
+            
+            💡 Triple-tap the top of the screen to see this anytime!
             """,
             preferredStyle: .alert
         )
@@ -72,5 +64,7 @@ class SPTRootSettingsViewHook: ClassHook<UIView> {
         })
         
         topController.present(alert, animated: true)
+        
+        NSLog("[EeveeSpotify] Version info alert presented")
     }
 }
