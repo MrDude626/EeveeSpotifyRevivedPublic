@@ -1,7 +1,7 @@
 Package: com.eevee.spotify
 Name: EeveeSpotify
-Version: 6.2.14
-Architecture: iphoneos-arm
+Version: 6.2.15
+Architecture: iphoneos-arm64
 Description: A tweak to get Spotify Premium for free, just like Spotilife
 Maintainer: Eevee
 Author: Eevee
